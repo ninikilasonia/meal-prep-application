@@ -1,3 +1,9 @@
+from app.schemas.household_schema import (
+    HouseholdMemberBase,
+    HouseholdMemberCreate,
+    HouseholdMemberResponse,
+    HouseholdMemberUpdate,
+)
 from app.schemas.ingredient_schema import (
     IngredientBase,
     IngredientCreate,
@@ -15,6 +21,10 @@ from app.schemas.recipe_schema import (
 
 
 __all__ = [
+    "HouseholdMemberBase",
+    "HouseholdMemberCreate",
+    "HouseholdMemberResponse",
+    "HouseholdMemberUpdate",
     "IngredientBase",
     "IngredientCreate",
     "IngredientResponse",
