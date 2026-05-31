@@ -17,6 +17,8 @@ Base = declarative_base()
 
 
 def create_db_tables() -> None:
+    import app.models  # noqa: F401
+
     Base.metadata.create_all(bind=engine)
 
 
