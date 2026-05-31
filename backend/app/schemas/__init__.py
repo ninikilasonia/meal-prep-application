@@ -4,6 +4,14 @@ from app.schemas.ingredient_schema import (
     IngredientResponse,
     IngredientUpdate,
 )
+from app.schemas.recipe_schema import (
+    RecipeBase,
+    RecipeCreate,
+    RecipeIngredientCreate,
+    RecipeIngredientResponse,
+    RecipeResponse,
+    RecipeUpdate,
+)
 
 
 __all__ = [
@@ -11,4 +19,10 @@ __all__ = [
     "IngredientCreate",
     "IngredientResponse",
     "IngredientUpdate",
+    "RecipeBase",
+    "RecipeCreate",
+    "RecipeIngredientCreate",
+    "RecipeIngredientResponse",
+    "RecipeResponse",
+    "RecipeUpdate",
 ]
