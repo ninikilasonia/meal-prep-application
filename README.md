@@ -19,7 +19,6 @@ A web-based meal prep platform that helps users create recipes, plan meals, calc
 meal-prep-application/
 ├── backend/
 ├── frontend/
-├── docs/
 ├── .gitignore
 └── README.md
 ```
