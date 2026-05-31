@@ -22,6 +22,7 @@ meal-prep-application/
 ├── docs/
 ├── .gitignore
 └── README.md
+```
 
 ## Project Description
 
