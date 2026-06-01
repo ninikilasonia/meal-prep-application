@@ -20,3 +20,6 @@ class Ingredient(Base):
     recipe_ingredients: Mapped[list["RecipeIngredient"]] = relationship(
         back_populates="ingredient",
     )
+    pantry_items: Mapped[list["PantryItem"]] = relationship(
+        back_populates="ingredient",
+    )

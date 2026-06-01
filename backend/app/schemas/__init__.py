@@ -10,6 +10,18 @@ from app.schemas.ingredient_schema import (
     IngredientResponse,
     IngredientUpdate,
 )
+from app.schemas.meal_plan_schema import (
+    MealPlanEntryBase,
+    MealPlanEntryCreate,
+    MealPlanEntryResponse,
+    MealPlanEntryUpdate,
+)
+from app.schemas.pantry_schema import (
+    PantryItemBase,
+    PantryItemCreate,
+    PantryItemResponse,
+    PantryItemUpdate,
+)
 from app.schemas.recipe_schema import (
     RecipeBase,
     RecipeCreate,
@@ -29,6 +41,14 @@ __all__ = [
     "IngredientCreate",
     "IngredientResponse",
     "IngredientUpdate",
+    "MealPlanEntryBase",
+    "MealPlanEntryCreate",
+    "MealPlanEntryResponse",
+    "MealPlanEntryUpdate",
+    "PantryItemBase",
+    "PantryItemCreate",
+    "PantryItemResponse",
+    "PantryItemUpdate",
     "RecipeBase",
     "RecipeCreate",
     "RecipeIngredientCreate",

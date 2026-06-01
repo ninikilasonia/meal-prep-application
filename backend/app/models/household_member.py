@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from sqlalchemy import Float, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -19,3 +21,6 @@ class HouseholdMember(Base):
     daily_calorie_goal: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     daily_protein_goal: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     daily_fiber_goal: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    meal_plan_entries: Mapped[list["MealPlanEntry"]] = relationship(
+        back_populates="member",
+    )

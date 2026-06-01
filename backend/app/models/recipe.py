@@ -18,6 +18,9 @@ class Recipe(Base):
         back_populates="recipe",
         cascade="all, delete-orphan",
     )
+    meal_plan_entries: Mapped[list["MealPlanEntry"]] = relationship(
+        back_populates="recipe",
+    )
 
 
 class RecipeIngredient(Base):
