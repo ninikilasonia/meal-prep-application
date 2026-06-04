@@ -11,6 +11,7 @@ class RecipeIngredientCreate(BaseModel):
 
 class RecipeIngredientResponse(RecipeIngredientCreate):
     id: int
+    name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
