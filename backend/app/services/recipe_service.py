@@ -11,6 +11,7 @@ from app.schemas.recipe_schema import (
     RecipeResponse,
     RecipeUpdate,
 )
+from app.services.nutrition_service import calculate_recipe_nutrition
 
 
 def recipe_query():
@@ -69,6 +70,7 @@ def serialize_recipe(recipe: Recipe) -> RecipeResponse:
         description=recipe.description,
         meal_type=recipe.meal_type,
         base_servings=recipe.base_servings,
+        **calculate_recipe_nutrition(recipe),
         ingredients=[
             RecipeIngredientResponse(
                 id=recipe_ingredient.id,

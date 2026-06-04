@@ -78,5 +78,15 @@ class RecipeUpdate(BaseModel):
 class RecipeResponse(RecipeBase):
     id: int
     ingredients: list[RecipeIngredientResponse] = Field(default_factory=list)
+    total_calories: float = 0
+    total_protein: float = 0
+    total_carbohydrates: float = 0
+    total_fat: float = 0
+    total_fiber: float = 0
+    calories_per_serving: float = 0
+    protein_per_serving: float = 0
+    carbohydrates_per_serving: float = 0
+    fat_per_serving: float = 0
+    fiber_per_serving: float = 0
 
     model_config = ConfigDict(from_attributes=True)
