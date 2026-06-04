@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import create_db_tables
+from app.routes import ingredient_router
 
 
 @asynccontextmanager
@@ -13,6 +14,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Web-Based Meal Prep Platform API", lifespan=lifespan)
+app.include_router(ingredient_router)
 
 
 @app.get("/")
