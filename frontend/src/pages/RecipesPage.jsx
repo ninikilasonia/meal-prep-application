@@ -1,80 +1,132 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import PageHeader from "../components/layout/PageHeader.jsx";
 import Card from "../components/common/Card.jsx";
+import Alert from "../components/common/Alert.jsx";
+import LoadingState from "../components/common/LoadingState.jsx";
 import EmptyState from "../components/common/EmptyState.jsx";
 import RecipeForm from "../components/forms/RecipeForm.jsx";
+import RecipeCard from "../components/recipes/RecipeCard.jsx";
+import { getIngredients } from "../api/ingredientsApi.js";
+import {
+  createRecipe,
+  deleteRecipe,
+  getRecipes,
+} from "../api/recipesApi.js";
 import styles from "./RecipesPage.module.css";
-
-// Temporary ingredient options for the selector — replaced by /ingredients in Task 16.
-const PLACEHOLDER_INGREDIENTS = [
-  { id: 1, name: "Chicken breast", unit: "g" },
-  { id: 2, name: "Rice", unit: "g" },
-  { id: 3, name: "Broccoli", unit: "g" },
-  { id: 4, name: "Olive oil", unit: "ml" },
-  { id: 5, name: "Eggs", unit: "piece" },
-];
 
 function RecipesPage() {
   const [recipes, setRecipes] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(null);
 
-  function handleCreate(recipe) {
-    setRecipes((prev) => [
-      ...prev,
-      { id: Date.now(), ...recipe, ingredientCount: recipe.ingredients.length },
-    ]);
+  const ingredientsById = useMemo(() => {
+    return Object.fromEntries(ingredients.map((item) => [item.id, item]));
+  }, [ingredients]);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [recipeData, ingredientData] = await Promise.all([
+        getRecipes(),
+        getIngredients(),
+      ]);
+      setRecipes(recipeData);
+      setIngredients(ingredientData);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  async function handleCreate(recipe) {
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const created = await createRecipe(recipe);
+      setRecipes((prev) => [...prev, created]);
+      setSuccess(`Saved "${created.name}".`);
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  function handleDelete(id) {
-    setRecipes((prev) => prev.filter((recipe) => recipe.id !== id));
+  async function handleDelete(id) {
+    setError(null);
+    setSuccess(null);
+    try {
+      await deleteRecipe(id);
+      setRecipes((prev) => prev.filter((recipe) => recipe.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   return (
     <div className={styles.page}>
       <PageHeader
         title="Recipes"
-        description="Build recipes from your ingredients. Nutrition is calculated by the backend once connected."
+        description="Build recipes from your ingredients. The backend calculates total and per-serving nutrition automatically."
       />
 
+      {error ? (
+        <Alert variant="error" onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
+      {success ? (
+        <Alert variant="success" onDismiss={() => setSuccess(null)}>
+          {success}
+        </Alert>
+      ) : null}
+
       <Card title="New recipe">
+        {ingredients.length === 0 && !loading ? (
+          <p className={styles.notice}>
+            Add ingredients first — recipes are built from your ingredient library.
+          </p>
+        ) : null}
         <RecipeForm
-          availableIngredients={PLACEHOLDER_INGREDIENTS}
+          availableIngredients={ingredients}
           onSubmit={handleCreate}
+          submitting={submitting}
         />
       </Card>
 
       <Card title={`Your recipes (${recipes.length})`}>
-        {recipes.length === 0 ? (
+        {loading ? (
+          <LoadingState label="Loading recipes…" />
+        ) : recipes.length === 0 ? (
           <EmptyState
             icon="🍲"
             title="No recipes yet"
-            message="Create your first recipe using the form above."
+            message="Create your first recipe using the form above to see its calculated nutrition."
           />
         ) : (
-          <ul className={styles.recipeList}>
+          <div className={styles.recipeGrid}>
             {recipes.map((recipe) => (
-              <li key={recipe.id} className={styles.recipeItem}>
-                <div>
-                  <h3 className={styles.recipeName}>{recipe.name}</h3>
-                  <p className={styles.recipeMeta}>
-                    {recipe.meal_type} · {recipe.base_servings} servings ·{" "}
-                    {recipe.ingredientCount} ingredient
-                    {recipe.ingredientCount === 1 ? "" : "s"}
-                  </p>
-                  {recipe.description ? (
-                    <p className={styles.recipeDesc}>{recipe.description}</p>
-                  ) : null}
-                </div>
-                <button
-                  type="button"
-                  className={styles.delete}
-                  onClick={() => handleDelete(recipe.id)}
-                >
-                  Delete
-                </button>
-              </li>
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                ingredientsById={ingredientsById}
+                onDelete={handleDelete}
+              />
             ))}
-          </ul>
+          </div>
         )}
       </Card>
     </div>
