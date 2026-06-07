@@ -1,19 +1,17 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import PageHeader from "../components/layout/PageHeader.jsx";
 import Card from "../components/common/Card.jsx";
+import Alert from "../components/common/Alert.jsx";
+import LoadingState from "../components/common/LoadingState.jsx";
+import EmptyState from "../components/common/EmptyState.jsx";
 import IngredientForm from "../components/forms/IngredientForm.jsx";
+import {
+  createIngredient,
+  deleteIngredient,
+  getIngredients,
+} from "../api/ingredientsApi.js";
 import styles from "./IngredientsPage.module.css";
-
-// Temporary placeholder data — replaced by the backend in Task 12.
-const PLACEHOLDER_INGREDIENTS = [
-  { id: 1, name: "Chicken breast", unit: "g", calories: 1.65, protein: 0.31, carbohydrates: 0, fat: 0.04, fiber: 0 },
-  { id: 2, name: "Rice", unit: "g", calories: 1.3, protein: 0.027, carbohydrates: 0.28, fat: 0.003, fiber: 0.004 },
-  { id: 3, name: "Broccoli", unit: "g", calories: 0.34, protein: 0.028, carbohydrates: 0.07, fat: 0.004, fiber: 0.026 },
-  { id: 4, name: "Olive oil", unit: "ml", calories: 8.84, protein: 0, carbohydrates: 0, fat: 1, fiber: 0 },
-  { id: 5, name: "Eggs", unit: "piece", calories: 78, protein: 6.3, carbohydrates: 0.6, fat: 5.3, fiber: 0 },
-  { id: 6, name: "Yogurt", unit: "g", calories: 0.59, protein: 0.1, carbohydrates: 0.047, fat: 0.0033, fiber: 0 },
-];
 
 const NUTRITION_COLUMNS = [
   { key: "calories", label: "Calories" },
@@ -24,14 +22,55 @@ const NUTRITION_COLUMNS = [
 ];
 
 function IngredientsPage() {
-  const [ingredients, setIngredients] = useState(PLACEHOLDER_INGREDIENTS);
+  const [ingredients, setIngredients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(null);
 
-  function handleAdd(ingredient) {
-    setIngredients((prev) => [...prev, { id: Date.now(), ...ingredient }]);
+  const loadIngredients = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getIngredients();
+      setIngredients(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadIngredients();
+  }, [loadIngredients]);
+
+  async function handleAdd(ingredient) {
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const created = await createIngredient(ingredient);
+      setIngredients((prev) => [...prev, created]);
+      setSuccess(`Added "${created.name}".`);
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  function handleDelete(id) {
-    setIngredients((prev) => prev.filter((item) => item.id !== id));
+  async function handleDelete(id) {
+    setError(null);
+    setSuccess(null);
+    try {
+      await deleteIngredient(id);
+      setIngredients((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   return (
@@ -41,15 +80,30 @@ function IngredientsPage() {
         description="Build your ingredient library. Each ingredient stores nutrition per unit, used to calculate recipe nutrition."
       />
 
+      {error ? (
+        <Alert variant="error" onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
+      {success ? (
+        <Alert variant="success" onDismiss={() => setSuccess(null)}>
+          {success}
+        </Alert>
+      ) : null}
+
       <Card title="Add ingredient">
-        <IngredientForm onSubmit={handleAdd} />
+        <IngredientForm onSubmit={handleAdd} submitting={submitting} />
       </Card>
 
       <Card title={`Ingredient library (${ingredients.length})`}>
-        {ingredients.length === 0 ? (
-          <p className={styles.empty}>
-            No ingredients yet. Add your first ingredient using the form above.
-          </p>
+        {loading ? (
+          <LoadingState label="Loading ingredients…" />
+        ) : ingredients.length === 0 ? (
+          <EmptyState
+            icon="🥕"
+            title="No ingredients yet"
+            message="Add your first ingredient using the form above to start your library."
+          />
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>

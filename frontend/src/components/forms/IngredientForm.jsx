@@ -52,14 +52,14 @@ function IngredientForm({ onSubmit, submitting = false }) {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const validationErrors = validate(form);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
       return;
     }
-    onSubmit({
+    const succeeded = await onSubmit({
       name: form.name.trim(),
       unit: form.unit.trim(),
       calories: Number(form.calories || 0),
@@ -68,8 +68,11 @@ function IngredientForm({ onSubmit, submitting = false }) {
       fat: Number(form.fat || 0),
       fiber: Number(form.fiber || 0),
     });
-    setForm(EMPTY_FORM);
-    setErrors({});
+    // Only clear the form when the parent confirms the save succeeded.
+    if (succeeded !== false) {
+      setForm(EMPTY_FORM);
+      setErrors({});
+    }
   }
 
   return (
