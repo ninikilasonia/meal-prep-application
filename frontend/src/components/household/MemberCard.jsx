@@ -57,9 +57,7 @@ function MemberCard({ member, onDelete }) {
             ))}
           </div>
         ) : (
-          <p className={styles.fallback}>
-            Goals are calculated by the backend once this member is saved.
-          </p>
+          <p className={styles.fallback}>Daily goals are not set yet.</p>
         )}
       </section>
     </article>
