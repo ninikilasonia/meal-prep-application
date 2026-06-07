@@ -77,5 +77,7 @@ class MealPlanEntryUpdate(BaseModel):
 
 class MealPlanEntryResponse(MealPlanEntryBase):
     id: int
+    recipe_name: str | None = None
+    member_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

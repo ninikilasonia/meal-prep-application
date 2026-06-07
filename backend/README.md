@@ -39,6 +39,11 @@ The API will be available at `http://127.0.0.1:8000`.
 - `POST /ingredients` creates an ingredient.
 - `PUT /ingredients/{ingredient_id}` updates an ingredient.
 - `DELETE /ingredients/{ingredient_id}` deletes an ingredient.
+- `GET /meal-plan` returns all meal plan entries.
+- `GET /meal-plan/{entry_id}` returns one meal plan entry.
+- `POST /meal-plan` creates a meal plan entry.
+- `PUT /meal-plan/{entry_id}` updates a meal plan entry.
+- `DELETE /meal-plan/{entry_id}` deletes a meal plan entry.
 - `GET /recipes` returns all recipes with recipe ingredients.
 - `GET /recipes/{recipe_id}` returns one recipe with recipe ingredients.
 - `POST /recipes` creates a recipe and its ingredient quantities.
