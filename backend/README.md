@@ -29,3 +29,18 @@ The API will be available at `http://127.0.0.1:8000`.
 
 - `GET /` returns the API welcome message.
 - `GET /health` returns backend health status.
+- `GET /household-members` returns all household members.
+- `GET /household-members/{member_id}` returns one household member.
+- `POST /household-members` creates a household member.
+- `PUT /household-members/{member_id}` updates a household member.
+- `DELETE /household-members/{member_id}` deletes a household member.
+- `GET /ingredients` returns all ingredients.
+- `GET /ingredients/{ingredient_id}` returns one ingredient.
+- `POST /ingredients` creates an ingredient.
+- `PUT /ingredients/{ingredient_id}` updates an ingredient.
+- `DELETE /ingredients/{ingredient_id}` deletes an ingredient.
+- `GET /recipes` returns all recipes with recipe ingredients.
+- `GET /recipes/{recipe_id}` returns one recipe with recipe ingredients.
+- `POST /recipes` creates a recipe and its ingredient quantities.
+- `PUT /recipes/{recipe_id}` updates a recipe and optionally replaces its ingredient list.
+- `DELETE /recipes/{recipe_id}` deletes a recipe.
