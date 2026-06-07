@@ -7,6 +7,7 @@ from app.schemas.household_schema import (
     HouseholdMemberCreate,
     HouseholdMemberUpdate,
 )
+from app.services.goal_service import apply_goal_estimates
 
 
 def get_household_member_or_404(db: Session, member_id: int) -> HouseholdMember:
@@ -29,6 +30,8 @@ def create_household_member(
     member_data: HouseholdMemberCreate,
 ) -> HouseholdMember:
     member = HouseholdMember(**member_data.model_dump())
+    apply_goal_estimates(member)
+
     db.add(member)
     db.commit()
     db.refresh(member)
@@ -44,6 +47,8 @@ def update_household_member(
 
     for field, value in member_data.model_dump(exclude_unset=True).items():
         setattr(member, field, value)
+
+    apply_goal_estimates(member)
 
     db.commit()
     db.refresh(member)
