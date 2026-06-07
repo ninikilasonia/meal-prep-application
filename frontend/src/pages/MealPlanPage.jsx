@@ -1,8 +1,18 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import PageHeader from "../components/layout/PageHeader.jsx";
 import Card from "../components/common/Card.jsx";
+import Alert from "../components/common/Alert.jsx";
+import LoadingState from "../components/common/LoadingState.jsx";
 import MealPlanGrid from "../components/meal-plan/MealPlanGrid.jsx";
+import { getRecipes } from "../api/recipesApi.js";
+import { getHouseholdMembers } from "../api/householdApi.js";
+import {
+  createMealPlanEntry,
+  deleteMealPlanEntry,
+  getMealPlan,
+  updateMealPlanEntry,
+} from "../api/mealPlanApi.js";
 import styles from "./MealPlanPage.module.css";
 
 const DAYS = [
@@ -16,16 +26,6 @@ const DAYS = [
 ];
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"];
 
-// Temporary options — replaced by /recipes and /household-members in Task 24.
-const PLACEHOLDER_RECIPES = [
-  { id: 1, name: "Chicken Rice Bowl" },
-  { id: 2, name: "Veggie Omelette" },
-];
-const PLACEHOLDER_MEMBERS = [
-  { id: 1, name: "Adult Maintain" },
-  { id: 2, name: "Teen Gain" },
-];
-
 const EMPTY_DRAFT = {
   day: "monday",
   meal_type: "breakfast",
@@ -36,32 +36,92 @@ const EMPTY_DRAFT = {
 
 function MealPlanPage() {
   const [entries, setEntries] = useState([]);
+  const [recipes, setRecipes] = useState([]);
+  const [members, setMembers] = useState([]);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+  // Whether the backend meal-plan endpoints are available. Until Nino adds
+  // them, the plan is kept in session-only local state.
+  const [planPersisted, setPlanPersisted] = useState(false);
+
+  const recipesById = useMemo(
+    () => Object.fromEntries(recipes.map((r) => [r.id, r])),
+    [recipes]
+  );
+  const membersById = useMemo(
+    () => Object.fromEntries(members.map((m) => [m.id, m])),
+    [members]
+  );
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [recipeData, memberData] = await Promise.all([
+        getRecipes(),
+        getHouseholdMembers(),
+      ]);
+      setRecipes(recipeData);
+      setMembers(memberData);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      return;
+    }
+
+    // The meal-plan endpoints may not exist yet — degrade gracefully.
+    try {
+      const planData = await getMealPlan();
+      setEntries(planData);
+      setPlanPersisted(true);
+      setNotice(null);
+    } catch {
+      setPlanPersisted(false);
+      setNotice(
+        "Meal plan saving isn't available on the backend yet, so your plan is kept in this session only."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   function handleDraftChange(event) {
     const { name, value } = event.target;
     setDraft((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleAdd(event) {
+  async function handleAdd(event) {
     event.preventDefault();
     if (!draft.recipe_id || !draft.member_id) {
       setError("Select both a recipe and a household member.");
       return;
     }
     setError(null);
-    setEntries((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        day: draft.day,
-        meal_type: draft.meal_type,
-        recipe_id: Number(draft.recipe_id),
-        member_id: Number(draft.member_id),
-        portion_multiplier: Number(draft.portion_multiplier) || 1,
-      },
-    ]);
+    const payload = {
+      day: draft.day,
+      meal_type: draft.meal_type,
+      recipe_id: Number(draft.recipe_id),
+      member_id: Number(draft.member_id),
+      portion_multiplier: Number(draft.portion_multiplier) || 1,
+    };
+
+    if (planPersisted) {
+      try {
+        const created = await createMealPlanEntry(payload);
+        setEntries((prev) => [...prev, created]);
+      } catch (err) {
+        setError(err.message);
+        return;
+      }
+    } else {
+      setEntries((prev) => [...prev, { id: Date.now(), ...payload }]);
+    }
     setDraft((prev) => ({ ...EMPTY_DRAFT, day: prev.day }));
   }
 
@@ -71,16 +131,29 @@ function MealPlanPage() {
         entry.id === id ? { ...entry, portion_multiplier: value } : entry
       )
     );
+    if (planPersisted) {
+      updateMealPlanEntry(id, { portion_multiplier: value }).catch((err) =>
+        setError(err.message)
+      );
+    }
   }
 
-  function handleRemove(id) {
+  async function handleRemove(id) {
+    if (planPersisted) {
+      try {
+        await deleteMealPlanEntry(id);
+      } catch (err) {
+        setError(err.message);
+        return;
+      }
+    }
     setEntries((prev) => prev.filter((entry) => entry.id !== id));
   }
 
-  const getRecipeName = (id) =>
-    PLACEHOLDER_RECIPES.find((r) => r.id === id)?.name ?? `Recipe #${id}`;
-  const getMemberName = (id) =>
-    PLACEHOLDER_MEMBERS.find((m) => m.id === id)?.name ?? `Member #${id}`;
+  const getRecipeName = (id, fallbackName) =>
+    recipesById[id]?.name ?? fallbackName ?? `Recipe #${id}`;
+  const getMemberName = (id, fallbackName) =>
+    membersById[id]?.name ?? fallbackName ?? `Member #${id}`;
 
   return (
     <div className={styles.page}>
@@ -89,8 +162,14 @@ function MealPlanPage() {
         description="Plan recipes for each day and household member. Adjust portions per planned meal."
       />
 
+      {error ? (
+        <Alert variant="error" onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
+      {notice ? <Alert variant="info">{notice}</Alert> : null}
+
       <Card title="Add to plan">
-        {error ? <p className={styles.error}>{error}</p> : null}
         <form className={styles.addForm} onSubmit={handleAdd}>
           <label className={styles.field}>
             <span className={styles.label}>Day</span>
@@ -116,7 +195,7 @@ function MealPlanPage() {
             <span className={styles.label}>Recipe</span>
             <select className={styles.input} name="recipe_id" value={draft.recipe_id} onChange={handleDraftChange}>
               <option value="">Select…</option>
-              {PLACEHOLDER_RECIPES.map((recipe) => (
+              {recipes.map((recipe) => (
                 <option key={recipe.id} value={recipe.id}>
                   {recipe.name}
                 </option>
@@ -127,7 +206,7 @@ function MealPlanPage() {
             <span className={styles.label}>Member</span>
             <select className={styles.input} name="member_id" value={draft.member_id} onChange={handleDraftChange}>
               <option value="">Select…</option>
-              {PLACEHOLDER_MEMBERS.map((member) => (
+              {members.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name}
                 </option>
@@ -150,17 +229,26 @@ function MealPlanPage() {
             Add
           </button>
         </form>
+        {recipes.length === 0 || members.length === 0 ? (
+          <p className={styles.hint}>
+            Add at least one recipe and one household member to build a plan.
+          </p>
+        ) : null}
       </Card>
 
       <Card title="Weekly plan">
-        <MealPlanGrid
-          days={DAYS}
-          entries={entries}
-          getRecipeName={getRecipeName}
-          getMemberName={getMemberName}
-          onPortionChange={handlePortionChange}
-          onRemove={handleRemove}
-        />
+        {loading ? (
+          <LoadingState label="Loading meal plan…" />
+        ) : (
+          <MealPlanGrid
+            days={DAYS}
+            entries={entries}
+            getRecipeName={getRecipeName}
+            getMemberName={getMemberName}
+            onPortionChange={handlePortionChange}
+            onRemove={handleRemove}
+          />
+        )}
       </Card>
     </div>
   );

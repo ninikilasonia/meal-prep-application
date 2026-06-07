@@ -60,3 +60,9 @@
   color: var(--color-danger);
   font-size: 0.85rem;
 }
+
+.hint {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
