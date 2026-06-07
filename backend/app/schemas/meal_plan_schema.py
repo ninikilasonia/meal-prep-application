@@ -18,7 +18,6 @@ class MealPlanEntryBase(BaseModel):
     meal_type: str
     recipe_id: int
     member_id: int
-    portion_multiplier: float = Field(default=1, gt=0)
 
     @field_validator("day")
     @classmethod
@@ -40,7 +39,7 @@ class MealPlanEntryBase(BaseModel):
 
 
 class MealPlanEntryCreate(MealPlanEntryBase):
-    pass
+    portion_multiplier: float | None = Field(default=None, gt=0)
 
 
 class MealPlanEntryUpdate(BaseModel):
@@ -77,5 +76,18 @@ class MealPlanEntryUpdate(BaseModel):
 
 class MealPlanEntryResponse(MealPlanEntryBase):
     id: int
+    portion_multiplier: float
+    recipe_name: str | None = None
+    member_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PortionSuggestionRequest(BaseModel):
+    recipe_id: int
+    member_id: int
+
+
+class PortionSuggestionResponse(BaseModel):
+    suggested_portion_multiplier: float
+    explanation: str
