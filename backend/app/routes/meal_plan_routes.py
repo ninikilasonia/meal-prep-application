@@ -6,6 +6,8 @@ from app.schemas.meal_plan_schema import (
     MealPlanEntryCreate,
     MealPlanEntryResponse,
     MealPlanEntryUpdate,
+    PortionSuggestionRequest,
+    PortionSuggestionResponse,
 )
 from app.services import meal_plan_service
 
@@ -18,6 +20,18 @@ def list_meal_plan_entries(
     db: Session = Depends(get_db),
 ) -> list[MealPlanEntryResponse]:
     return meal_plan_service.list_meal_plan_entries(db)
+
+
+@router.post("/suggest-portion", response_model=PortionSuggestionResponse)
+def suggest_portion(
+    suggestion_data: PortionSuggestionRequest,
+    db: Session = Depends(get_db),
+) -> PortionSuggestionResponse:
+    return meal_plan_service.suggest_portion_for_entry(
+        db,
+        suggestion_data.recipe_id,
+        suggestion_data.member_id,
+    )
 
 
 @router.get("/{entry_id}", response_model=MealPlanEntryResponse)

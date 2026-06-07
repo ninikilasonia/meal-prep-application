@@ -15,6 +15,8 @@ from app.schemas.meal_plan_schema import (
     MealPlanEntryCreate,
     MealPlanEntryResponse,
     MealPlanEntryUpdate,
+    PortionSuggestionRequest,
+    PortionSuggestionResponse,
 )
 from app.schemas.pantry_schema import (
     PantryItemBase,
@@ -45,6 +47,8 @@ __all__ = [
     "MealPlanEntryCreate",
     "MealPlanEntryResponse",
     "MealPlanEntryUpdate",
+    "PortionSuggestionRequest",
+    "PortionSuggestionResponse",
     "PantryItemBase",
     "PantryItemCreate",
     "PantryItemResponse",

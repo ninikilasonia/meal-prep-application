@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.household_member import HouseholdMember
 from app.models.meal_plan import MealPlanEntry
-from app.models.recipe import Recipe
+from app.models.recipe import Recipe, RecipeIngredient
 from app.schemas.meal_plan_schema import (
     MealPlanEntryCreate,
     MealPlanEntryResponse,
     MealPlanEntryUpdate,
+    PortionSuggestionResponse,
 )
+from app.services.portion_service import suggest_portion_multiplier
 
 
 def meal_plan_query():
@@ -51,6 +53,43 @@ def validate_entry_references(db: Session, recipe_id: int, member_id: int) -> No
     validate_member_exists(db, member_id)
 
 
+def get_recipe_and_member(
+    db: Session,
+    recipe_id: int,
+    member_id: int,
+) -> tuple[Recipe, HouseholdMember]:
+    recipe = db.scalar(
+        select(Recipe)
+        .options(
+            selectinload(Recipe.ingredients).selectinload(RecipeIngredient.ingredient),
+        )
+        .where(Recipe.id == recipe_id),
+    )
+    if recipe is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recipe not found",
+        )
+
+    member = db.get(HouseholdMember, member_id)
+    if member is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Household member not found",
+        )
+
+    return recipe, member
+
+
+def suggest_portion_for_entry(
+    db: Session,
+    recipe_id: int,
+    member_id: int,
+) -> PortionSuggestionResponse:
+    recipe, member = get_recipe_and_member(db, recipe_id, member_id)
+    return suggest_portion_multiplier(member, recipe)
+
+
 def serialize_meal_plan_entry(entry: MealPlanEntry) -> MealPlanEntryResponse:
     return MealPlanEntryResponse(
         id=entry.id,
@@ -78,8 +117,16 @@ def create_meal_plan_entry(
     entry_data: MealPlanEntryCreate,
 ) -> MealPlanEntryResponse:
     validate_entry_references(db, entry_data.recipe_id, entry_data.member_id)
+    entry_values = entry_data.model_dump()
+    if entry_values["portion_multiplier"] is None:
+        suggestion = suggest_portion_for_entry(
+            db,
+            entry_data.recipe_id,
+            entry_data.member_id,
+        )
+        entry_values["portion_multiplier"] = suggestion.suggested_portion_multiplier
 
-    entry = MealPlanEntry(**entry_data.model_dump())
+    entry = MealPlanEntry(**entry_values)
     db.add(entry)
     db.commit()
 

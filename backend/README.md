@@ -42,6 +42,7 @@ The API will be available at `http://127.0.0.1:8000`.
 - `GET /meal-plan` returns all meal plan entries.
 - `GET /meal-plan/{entry_id}` returns one meal plan entry.
 - `POST /meal-plan` creates a meal plan entry.
+- `POST /meal-plan/suggest-portion` suggests a portion multiplier.
 - `PUT /meal-plan/{entry_id}` updates a meal plan entry.
 - `DELETE /meal-plan/{entry_id}` deletes a meal plan entry.
 - `GET /recipes` returns all recipes with recipe ingredients.
