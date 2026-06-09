@@ -1,0 +1,50 @@
+.slot {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mealType {
+  display: inline-block;
+  background-color: var(--color-accent);
+  color: var(--color-primary-dark);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.remove {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+.remove:hover {
+  color: var(--color-danger);
+}
+
+.recipe {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.member {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}

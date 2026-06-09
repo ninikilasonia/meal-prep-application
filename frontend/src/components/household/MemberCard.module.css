@@ -1,0 +1,112 @@
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background-color: var(--color-surface);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.name {
+  margin: 0 0 2px;
+  font-size: 1.1rem;
+}
+
+.meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+}
+
+.delete {
+  flex-shrink: 0;
+  background-color: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+}
+
+.delete:hover {
+  border-color: var(--color-danger);
+  background-color: rgba(192, 57, 43, 0.06);
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.details div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 4px;
+}
+
+.details dt {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.details dd {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.goalsTitle {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+
+.goalGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.goalItem {
+  background-color: var(--color-bg);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.goalValue {
+  display: block;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.goalLabel {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.fallback {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
