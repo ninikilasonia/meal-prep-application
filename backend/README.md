@@ -25,6 +25,18 @@ uvicorn app.main:app --reload
 
 The API will be available at `http://127.0.0.1:8000`.
 
+## Demo Seed Data
+
+To add sample data for a progress report demo, run this from the `backend` folder:
+
+```powershell
+python seed_data.py
+```
+
+The seed script is safe to run more than once. It reuses existing demo records by name and avoids creating duplicate meal plan entries.
+
+The generated SQLite database file is ignored by Git and should not be committed.
+
 ## Endpoints
 
 - `GET /` returns the API welcome message.
