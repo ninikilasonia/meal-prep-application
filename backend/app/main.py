@@ -9,6 +9,7 @@ from app.routes import (
     ingredient_router,
     meal_plan_router,
     recipe_router,
+    shopping_list_router,
 )
 
 
@@ -23,6 +24,7 @@ app.include_router(household_router)
 app.include_router(ingredient_router)
 app.include_router(meal_plan_router)
 app.include_router(recipe_router)
+app.include_router(shopping_list_router)
 
 
 @app.get("/")
