@@ -8,6 +8,7 @@ from app.routes import (
     household_router,
     ingredient_router,
     meal_plan_router,
+    pantry_router,
     recipe_router,
     shopping_list_router,
 )
@@ -23,6 +24,7 @@ app = FastAPI(title="Web-Based Meal Prep Platform API", lifespan=lifespan)
 app.include_router(household_router)
 app.include_router(ingredient_router)
 app.include_router(meal_plan_router)
+app.include_router(pantry_router)
 app.include_router(recipe_router)
 app.include_router(shopping_list_router)
 
