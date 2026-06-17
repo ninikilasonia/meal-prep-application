@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import PageHeader from "../components/layout/PageHeader.jsx";
 import Card from "../components/common/Card.jsx";
+import NutritionSummary from "../components/nutrition/NutritionSummary.jsx";
 import { getIngredients } from "../api/ingredientsApi.js";
 import { getRecipes } from "../api/recipesApi.js";
 import { getHouseholdMembers } from "../api/householdApi.js";
@@ -15,7 +16,6 @@ const FEATURE_CARDS = [
   { icon: "👥", title: "Household Profiles", description: "Add members for personalized planning.", to: "/household" },
   { icon: "🗓️", title: "Meal Plan Calendar", description: "Plan meals across the week.", to: "/meal-plan" },
   { icon: "🛒", title: "Shopping List", description: "Generate a list from planned meals.", to: "/shopping-list" },
-  { icon: "📊", title: "Nutrition Summary", description: "Track daily and weekly nutrition.", comingSoon: true },
 ];
 
 function StatCard({ label, value }) {
@@ -79,6 +79,8 @@ function DashboardPage() {
         <StatCard label="Household members" value={show(stats.members)} />
         <StatCard label="Planned meals" value={show(stats.plannedMeals)} />
       </div>
+
+      <NutritionSummary />
 
       <Card title="Modules">
         <div className={styles.featureGrid}>

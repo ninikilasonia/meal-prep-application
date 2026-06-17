@@ -1,0 +1,80 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.member {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.select {
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font: inherit;
+  background-color: var(--color-surface);
+}
+
+.dayGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.dayCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  background-color: var(--color-bg);
+}
+
+.dayTitle {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weeklyWrap {
+  border-top: 1px solid var(--color-border);
+  padding-top: 16px;
+}
+
+.weeklyTitle {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+}
+
+.weekly {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.weeklyStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+}
+
+.weeklyValue {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.weeklyLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
