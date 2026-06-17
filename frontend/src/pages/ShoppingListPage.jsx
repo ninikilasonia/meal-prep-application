@@ -1,54 +1,61 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import PageHeader from "../components/layout/PageHeader.jsx";
 import Card from "../components/common/Card.jsx";
+import Alert from "../components/common/Alert.jsx";
+import LoadingState from "../components/common/LoadingState.jsx";
 import EmptyState from "../components/common/EmptyState.jsx";
 import ShoppingListTable from "../components/shopping-list/ShoppingListTable.jsx";
+import { getShoppingList } from "../api/shoppingListApi.js";
+import {
+  createPantryItem,
+  getPantry,
+  updatePantryItem,
+} from "../api/pantryApi.js";
 import styles from "./ShoppingListPage.module.css";
 
-// Task 35 — static placeholder behavior. The shopping list is generated from
-// local sample data so the layout can be reviewed before the backend
-// /shopping-list and /pantry endpoints are wired up (Task 36).
-const PLACEHOLDER_ITEMS = [
-  {
-    ingredient_id: 1,
-    ingredient_name: "Chicken breast",
-    unit: "g",
-    required_quantity: 800,
-    available_quantity: 200,
-  },
-  {
-    ingredient_id: 2,
-    ingredient_name: "Rice",
-    unit: "g",
-    required_quantity: 600,
-    available_quantity: 0,
-  },
-  {
-    ingredient_id: 3,
-    ingredient_name: "Broccoli",
-    unit: "g",
-    required_quantity: 300,
-    available_quantity: 350,
-  },
-];
-
-// final_quantity_to_buy never goes below zero, even if you already have more
-// than the recipe requires.
+// Keep "to buy" never below zero for instant local feedback while editing.
+// The backend recomputes the authoritative value on the next refresh.
 function withFinalQuantity(item) {
   const required = Number(item.required_quantity) || 0;
   const available = Number(item.available_quantity) || 0;
   return { ...item, final_quantity_to_buy: Math.max(required - available, 0) };
 }
 
+const pantryItemId = (item) => item.id ?? item.pantry_item_id;
+
 function ShoppingListPage() {
   const [items, setItems] = useState([]);
-  const [generated, setGenerated] = useState(false);
+  const [pantryMap, setPantryMap] = useState({});
+  const [dirty, setDirty] = useState(new Set());
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  function handleGenerate() {
-    setItems(PLACEHOLDER_ITEMS.map(withFinalQuantity));
-    setGenerated(true);
-  }
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [list, pantry] = await Promise.all([getShoppingList(), getPantry()]);
+      setItems((Array.isArray(list) ? list : []).map(withFinalQuantity));
+      const map = {};
+      for (const entry of Array.isArray(pantry) ? pantry : []) {
+        map[entry.ingredient_id] = pantryItemId(entry);
+      }
+      setPantryMap(map);
+      setDirty(new Set());
+    } catch (err) {
+      setError(err.message);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   function handleAvailableChange(ingredientId, value) {
     setItems((prev) =>
@@ -58,6 +65,34 @@ function ShoppingListPage() {
           : item
       )
     );
+    setDirty((prev) => new Set(prev).add(ingredientId));
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const edited = items.filter((item) => dirty.has(item.ingredient_id));
+      for (const item of edited) {
+        const available = Number(item.available_quantity) || 0;
+        const existingId = pantryMap[item.ingredient_id];
+        if (existingId !== undefined) {
+          await updatePantryItem(existingId, { available_quantity: available });
+        } else {
+          await createPantryItem({
+            ingredient_id: item.ingredient_id,
+            available_quantity: available,
+          });
+        }
+      }
+      setSuccess("Pantry quantities saved.");
+      await load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -67,19 +102,49 @@ function ShoppingListPage() {
         description="A generated list of ingredients you still need to buy, based on your planned meals and what you already have at home."
       />
 
+      {error ? (
+        <Alert variant="error" onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
+      {success ? (
+        <Alert variant="success" onDismiss={() => setSuccess(null)}>
+          {success}
+        </Alert>
+      ) : null}
+
       <Card
         title="Ingredients to buy"
         actions={
-          <button type="button" className={styles.generate} onClick={handleGenerate}>
-            {generated ? "Regenerate list" : "Generate shopping list"}
-          </button>
+          <div className={styles.actions}>
+            {dirty.size > 0 ? (
+              <button
+                type="button"
+                className={styles.save}
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "Save available quantities"}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={styles.generate}
+              onClick={load}
+              disabled={loading}
+            >
+              Refresh
+            </button>
+          </div>
         }
       >
-        {items.length === 0 ? (
+        {loading ? (
+          <LoadingState label="Generating shopping list…" />
+        ) : items.length === 0 ? (
           <EmptyState
             icon="🛒"
             title="No shopping list yet"
-            message="Plan some meals first, then generate a shopping list to see what you need to buy."
+            message="Plan some meals first, then refresh to see what you need to buy."
           />
         ) : (
           <ShoppingListTable items={items} onAvailableChange={handleAvailableChange} />

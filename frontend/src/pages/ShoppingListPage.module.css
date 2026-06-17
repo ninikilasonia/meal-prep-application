@@ -4,7 +4,26 @@
   gap: 20px;
 }
 
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
 .generate {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.generate:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.save {
   border: none;
   background-color: var(--color-primary);
   color: #fff;
@@ -14,6 +33,12 @@
   font-weight: 600;
 }
 
-.generate:hover {
+.save:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
+}
+
+.generate:disabled,
+.save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
