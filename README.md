@@ -58,7 +58,7 @@ python seed_data.py
 
 The seed script adds demo ingredients, recipes, household members, and meal plan entries. It is safe to run more than once because it reuses existing demo records by name and avoids duplicate meal plan entries.
 
-### Main API Routes
+### API Routes
 
 - `GET /` and `GET /health` for basic API and health checks.
 - `/household-members` supports listing, creating, reading, updating, and deleting household members.

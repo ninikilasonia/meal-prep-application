@@ -24,6 +24,7 @@ uvicorn app.main:app --reload
 ```
 
 The API will be available at `http://127.0.0.1:8000`.
+FastAPI documentation will be available at `http://127.0.0.1:8000/docs`.
 
 ## Demo Seed Data
 
@@ -36,6 +37,14 @@ python seed_data.py
 The seed script is safe to run more than once. It reuses existing demo records by name and avoids creating duplicate meal plan entries.
 
 The generated SQLite database file is ignored by Git and should not be committed.
+
+## Tests
+
+Run the backend test suite from the `backend` folder:
+
+```powershell
+python -m pytest
+```
 
 ## Endpoints
 
@@ -57,8 +66,14 @@ The generated SQLite database file is ignored by Git and should not be committed
 - `POST /meal-plan/suggest-portion` suggests a portion multiplier.
 - `PUT /meal-plan/{entry_id}` updates a meal plan entry.
 - `DELETE /meal-plan/{entry_id}` deletes a meal plan entry.
+- `GET /nutrition-summary` returns daily and weekly planned nutrition totals by household member.
+- `GET /pantry` returns pantry items.
+- `POST /pantry` creates a pantry item.
+- `PUT /pantry/{pantry_item_id}` updates a pantry item.
+- `DELETE /pantry/{pantry_item_id}` deletes a pantry item.
 - `GET /recipes` returns all recipes with recipe ingredients.
 - `GET /recipes/{recipe_id}` returns one recipe with recipe ingredients.
 - `POST /recipes` creates a recipe and its ingredient quantities.
 - `PUT /recipes/{recipe_id}` updates a recipe and optionally replaces its ingredient list.
 - `DELETE /recipes/{recipe_id}` deletes a recipe.
+- `GET /shopping-list` generates a combined shopping list from planned meals and pantry quantities.
