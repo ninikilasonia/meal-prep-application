@@ -9,7 +9,7 @@ A web-based meal prep platform that helps users create recipes, plan meals, calc
 
 ## Technology Stack
 
-- Backend: Python
+- Backend: Python 3, FastAPI, SQLAlchemy, SQLite, Uvicorn, Pytest
 - Frontend: React
 - Version Control: GitHub
 
@@ -22,6 +22,70 @@ meal-prep-application/
 ├── .gitignore
 └── README.md
 ```
+
+## Backend
+
+The backend is a Python FastAPI API that stores meal prep data in a local SQLite database through SQLAlchemy models and services. FastAPI creates the database tables automatically when the app starts. The generated database file is `backend/meal_prep.db` and is ignored by Git.
+
+### Backend Setup
+
+Run these commands from the `backend` folder:
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### Run the Backend
+
+From the `backend` folder, start the local API server:
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+The API runs at `http://127.0.0.1:8000`. FastAPI documentation is available at `http://127.0.0.1:8000/docs` while the server is running.
+
+### Seed Demo Data
+
+From the `backend` folder, run:
+
+```powershell
+python seed_data.py
+```
+
+The seed script adds demo ingredients, recipes, household members, and meal plan entries. It is safe to run more than once because it reuses existing demo records by name and avoids duplicate meal plan entries.
+
+### Main API Routes
+
+- `GET /` and `GET /health` for basic API and health checks.
+- `/household-members` supports listing, creating, reading, updating, and deleting household members.
+- `/ingredients` supports listing, creating, reading, updating, and deleting ingredients.
+- `/recipes` supports listing, creating, reading, updating, and deleting recipes with ingredient quantities.
+- `/meal-plan` supports listing, creating, reading, updating, and deleting meal plan entries.
+- `POST /meal-plan/suggest-portion` suggests a portion multiplier for a member and recipe.
+- `GET /nutrition-summary` returns daily and weekly planned nutrition totals by household member.
+- `/pantry` supports listing, creating, updating, and deleting pantry item quantities.
+- `GET /shopping-list` generates a combined shopping list from planned meals and pantry quantities.
+
+### Calculation Features
+
+- Recipe nutrition totals and per-serving values for calories, protein, carbohydrates, fat, and fiber.
+- Planned meal nutrition based on recipe per-serving values and meal plan portion multipliers.
+- Household member goal estimates for daily calories, protein, and fiber using age, sex, weight, height, activity level, and goal.
+- Portion suggestions that account for age group, nutrition goal, activity level, recipe calories, and clamp results between `0.4` and `1.5`.
+- Daily and weekly nutrition summaries grouped by household member.
+- Shopping list totals that combine planned recipe ingredients and subtract available pantry quantities without returning negative buy amounts.
+
+### Known Limitations
+
+- The backend uses local SQLite storage and does not include user accounts, authentication, or authorization.
+- Database tables are created automatically, but there is no migration system yet.
+- Nutrition, calorie goal, and portion calculations are simplified planning estimates, not medical or dietary advice.
+- Ingredient quantities are calculated in their stored units; the backend does not convert between units.
+- The shopping list is generated from all current meal plan entries and does not filter by date range yet.
 
 ## Project Description
 
