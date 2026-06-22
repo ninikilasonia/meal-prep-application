@@ -1,20 +1,11 @@
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
-from app.models.meal_plan import MealPlanEntry
-from app.models.recipe import Recipe, RecipeIngredient
 from app.schemas.shopping_list_schema import ShoppingListItemResponse
-from app.services import pantry_service
+from app.services import meal_plan_service, pantry_service
 
 
 def generate_shopping_list(db: Session) -> list[ShoppingListItemResponse]:
-    entries = db.scalars(
-        select(MealPlanEntry).options(
-            selectinload(MealPlanEntry.recipe)
-            .selectinload(Recipe.ingredients)
-            .selectinload(RecipeIngredient.ingredient),
-        ),
-    ).all()
+    entries = meal_plan_service.list_meal_plan_entries_with_recipe_ingredients(db)
 
     grouped_items: dict[int, ShoppingListItemResponse] = {}
     for entry in entries:
@@ -37,6 +28,7 @@ def generate_shopping_list(db: Session) -> list[ShoppingListItemResponse]:
     available_quantities = pantry_service.get_available_quantities_by_ingredient(db)
     for item in grouped_items.values():
         item.available_quantity = available_quantities.get(item.ingredient_id, 0)
+        # Pantry can exceed the plan; the shopping list should never go negative.
         item.final_quantity_to_buy = max(
             item.required_quantity - item.available_quantity,
             0,

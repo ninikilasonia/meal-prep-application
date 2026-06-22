@@ -1,14 +1,12 @@
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from app.models.household_member import HouseholdMember
-from app.models.meal_plan import MealPlanEntry
-from app.models.recipe import Recipe, RecipeIngredient
 from app.schemas.nutrition_summary_schema import (
     DailyNutritionSummaryResponse,
     MemberNutritionSummaryResponse,
     WeeklyNutritionSummaryResponse,
 )
+from app.services import meal_plan_service
 from app.services.nutrition_service import (
     NUTRITION_FIELDS,
     NutritionValues,
@@ -28,15 +26,6 @@ DAY_ORDER = {
 }
 
 
-def meal_plan_nutrition_query():
-    return select(MealPlanEntry).options(
-        selectinload(MealPlanEntry.member),
-        selectinload(MealPlanEntry.recipe)
-        .selectinload(Recipe.ingredients)
-        .selectinload(RecipeIngredient.ingredient),
-    )
-
-
 def add_nutrition_values(
     totals: NutritionValues,
     values: NutritionValues,
@@ -53,6 +42,7 @@ def build_daily_summary(
     return DailyNutritionSummaryResponse(
         day=day,
         **totals,
+        # Include goals per day so the frontend can compare planned vs target values.
         calorie_goal=member.daily_calorie_goal,
         protein_goal=member.daily_protein_goal,
         fiber_goal=member.daily_fiber_goal,
@@ -77,7 +67,7 @@ def build_weekly_summary(
 def calculate_planned_nutrition_by_member(
     db: Session,
 ) -> list[MemberNutritionSummaryResponse]:
-    entries = db.scalars(meal_plan_nutrition_query()).all()
+    entries = meal_plan_service.list_meal_plan_entries_with_recipe_ingredients(db)
 
     grouped: dict[int, tuple[HouseholdMember, dict[str, NutritionValues]]] = {}
     for entry in entries:

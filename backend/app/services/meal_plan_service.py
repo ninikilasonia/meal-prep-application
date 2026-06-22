@@ -14,15 +14,30 @@ from app.schemas.meal_plan_schema import (
 from app.services.portion_service import suggest_portion_multiplier
 
 
-def meal_plan_query():
+def meal_plan_entry_query():
     return select(MealPlanEntry).options(
         selectinload(MealPlanEntry.recipe),
         selectinload(MealPlanEntry.member),
     )
 
 
+def meal_plan_entries_with_recipe_ingredients_query():
+    return select(MealPlanEntry).options(
+        selectinload(MealPlanEntry.member),
+        selectinload(MealPlanEntry.recipe)
+        .selectinload(Recipe.ingredients)
+        .selectinload(RecipeIngredient.ingredient),
+    )
+
+
+def list_meal_plan_entries_with_recipe_ingredients(
+    db: Session,
+) -> list[MealPlanEntry]:
+    return list(db.scalars(meal_plan_entries_with_recipe_ingredients_query()).all())
+
+
 def get_meal_plan_entry_or_404(db: Session, entry_id: int) -> MealPlanEntry:
-    entry = db.scalar(meal_plan_query().where(MealPlanEntry.id == entry_id))
+    entry = db.scalar(meal_plan_entry_query().where(MealPlanEntry.id == entry_id))
     if entry is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -104,7 +119,7 @@ def serialize_meal_plan_entry(entry: MealPlanEntry) -> MealPlanEntryResponse:
 
 
 def list_meal_plan_entries(db: Session) -> list[MealPlanEntryResponse]:
-    entries = db.scalars(meal_plan_query()).all()
+    entries = db.scalars(meal_plan_entry_query()).all()
     return [serialize_meal_plan_entry(entry) for entry in entries]
 
 
