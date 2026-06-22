@@ -52,3 +52,14 @@ def calculate_recipe_nutrition(recipe: Recipe) -> dict[str, float]:
         nutrition[f"{field}_per_serving"] = per_serving_nutrition[field]
 
     return nutrition
+
+
+def calculate_planned_recipe_nutrition(
+    recipe: Recipe,
+    portion_multiplier: float,
+) -> NutritionValues:
+    recipe_nutrition = calculate_recipe_nutrition(recipe)
+    return {
+        field: recipe_nutrition[f"{field}_per_serving"] * portion_multiplier
+        for field in NUTRITION_FIELDS
+    }
