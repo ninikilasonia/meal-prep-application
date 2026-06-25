@@ -107,15 +107,6 @@ function DashboardPage() {
           })}
         </div>
       </Card>
-
-      <Card>
-        <p className={styles.note}>
-          This progress version demonstrates the core structure of the meal prep
-          platform: ingredients, recipes, household members, and basic meal
-          planning. Shopping list generation and nutrition summaries will be
-          completed in the final version.
-        </p>
-      </Card>
     </div>
   );
 }
