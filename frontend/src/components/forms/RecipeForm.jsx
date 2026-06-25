@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import Select from "../common/Select.jsx";
 import styles from "./RecipeForm.module.css";
 
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"];
@@ -107,25 +108,19 @@ function RecipeForm({ availableIngredients = [], onSubmit, submitting = false })
           />
           {errors.name ? <span className={styles.error}>{errors.name}</span> : null}
         </label>
-        <label className={styles.field}>
+        <div className={styles.field}>
           <span className={styles.label}>Meal type</span>
-          <select
-            className={styles.input}
+          <Select
             name="meal_type"
+            label="Meal type"
             value={form.meal_type}
             onChange={handleChange}
-          >
-            <option value="">Select…</option>
-            {MEAL_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
+            options={MEAL_TYPES}
+          />
           {errors.meal_type ? (
             <span className={styles.error}>{errors.meal_type}</span>
           ) : null}
-        </label>
+        </div>
         <label className={styles.field}>
           <span className={styles.label}>Base servings</span>
           <input
@@ -158,18 +153,16 @@ function RecipeForm({ availableIngredients = [], onSubmit, submitting = false })
       <fieldset className={styles.picker}>
         <legend className={styles.label}>Ingredients</legend>
         <div className={styles.pickerRow}>
-          <select
-            className={styles.input}
+          <Select
+            label="Ingredient"
+            placeholder="Select ingredient…"
             value={picker.ingredientId}
             onChange={(e) => setPicker((p) => ({ ...p, ingredientId: e.target.value }))}
-          >
-            <option value="">Select ingredient…</option>
-            {availableIngredients.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name} ({item.unit})
-              </option>
-            ))}
-          </select>
+            options={availableIngredients.map((item) => ({
+              value: item.id,
+              label: `${item.name} (${item.unit})`,
+            }))}
+          />
           <input
             className={styles.input}
             type="number"
