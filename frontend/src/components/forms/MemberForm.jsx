@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import Select from "../common/Select.jsx";
 import styles from "./MemberForm.module.css";
 
 const SEX_OPTIONS = ["male", "female", "other"];
@@ -72,23 +73,17 @@ function MemberForm({ onSubmit, submitting = false }) {
 
   function renderSelect(name, label, options) {
     return (
-      <label className={styles.field}>
+      <div className={styles.field}>
         <span className={styles.label}>{label}</span>
-        <select
-          className={styles.input}
+        <Select
           name={name}
+          label={label}
           value={form[name]}
           onChange={handleChange}
-        >
-          <option value="">Select…</option>
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
+          options={options}
+        />
         {errors[name] ? <span className={styles.error}>{errors[name]}</span> : null}
-      </label>
+      </div>
     );
   }
 

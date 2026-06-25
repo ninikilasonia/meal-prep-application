@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import Card from "../common/Card.jsx";
+import Select from "../common/Select.jsx";
 import Alert from "../common/Alert.jsx";
 import LoadingState from "../common/LoadingState.jsx";
 import EmptyState from "../common/EmptyState.jsx";
@@ -84,17 +85,17 @@ function NutritionSummary() {
       title="Nutrition summary"
       actions={
         summaries.length > 1 ? (
-          <select
-            className={styles.select}
-            value={selectedId ?? ""}
-            onChange={(event) => setSelectedId(Number(event.target.value))}
-          >
-            {summaries.map((item) => (
-              <option key={item.member_id} value={item.member_id}>
-                {item.member_name ?? `Member #${item.member_id}`}
-              </option>
-            ))}
-          </select>
+          <div className={styles.memberSelect}>
+            <Select
+              label="Household member"
+              value={selectedId ?? ""}
+              onChange={(event) => setSelectedId(Number(event.target.value))}
+              options={summaries.map((item) => ({
+                value: item.member_id,
+                label: item.member_name ?? `Member #${item.member_id}`,
+              }))}
+            />
+          </div>
         ) : null
       }
     >

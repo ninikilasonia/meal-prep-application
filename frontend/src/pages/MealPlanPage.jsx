@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import PageHeader from "../components/layout/PageHeader.jsx";
 import Card from "../components/common/Card.jsx";
+import Select from "../components/common/Select.jsx";
 import Alert from "../components/common/Alert.jsx";
 import LoadingState from "../components/common/LoadingState.jsx";
 import MealPlanGrid from "../components/meal-plan/MealPlanGrid.jsx";
@@ -171,48 +172,34 @@ function MealPlanPage() {
 
       <Card title="Add to plan">
         <form className={styles.addForm} onSubmit={handleAdd}>
-          <label className={styles.field}>
+          <div className={styles.field}>
             <span className={styles.label}>Day</span>
-            <select className={styles.input} name="day" value={draft.day} onChange={handleDraftChange}>
-              {DAYS.map((day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={styles.field}>
+            <Select name="day" label="Day" value={draft.day} onChange={handleDraftChange} options={DAYS} />
+          </div>
+          <div className={styles.field}>
             <span className={styles.label}>Meal</span>
-            <select className={styles.input} name="meal_type" value={draft.meal_type} onChange={handleDraftChange}>
-              {MEAL_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={styles.field}>
+            <Select name="meal_type" label="Meal" value={draft.meal_type} onChange={handleDraftChange} options={MEAL_TYPES} />
+          </div>
+          <div className={styles.field}>
             <span className={styles.label}>Recipe</span>
-            <select className={styles.input} name="recipe_id" value={draft.recipe_id} onChange={handleDraftChange}>
-              <option value="">Select…</option>
-              {recipes.map((recipe) => (
-                <option key={recipe.id} value={recipe.id}>
-                  {recipe.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={styles.field}>
+            <Select
+              name="recipe_id"
+              label="Recipe"
+              value={draft.recipe_id}
+              onChange={handleDraftChange}
+              options={recipes.map((recipe) => ({ value: recipe.id, label: recipe.name }))}
+            />
+          </div>
+          <div className={styles.field}>
             <span className={styles.label}>Member</span>
-            <select className={styles.input} name="member_id" value={draft.member_id} onChange={handleDraftChange}>
-              <option value="">Select…</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            <Select
+              name="member_id"
+              label="Member"
+              value={draft.member_id}
+              onChange={handleDraftChange}
+              options={members.map((member) => ({ value: member.id, label: member.name }))}
+            />
+          </div>
           <label className={styles.field}>
             <span className={styles.label}>Portion ×</span>
             <input
